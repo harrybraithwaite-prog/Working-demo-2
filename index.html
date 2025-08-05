@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cool Quote – Instant Air Conditioning Quote</title>
+<meta name="theme-color" content="#1e3a8a">
+<style>
+:root{--blue-900:#0b2e5c;--blue-700:#1e3a8a;--blue-500:#3b82f6;--blue-100:#e0f2fe}
+*{box-sizing:border-box}body{margin:0;font-family:sans-serif;color:#0b2239;background:#fff}
+a{color:var(--blue-700);text-decoration:none}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #eee}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{height:38px}
+.container{max-width:900px;margin:auto;padding:18px}
+.hero{padding:28px 18px;background:linear-gradient(180deg,#f0f7ff,#ffffff)}
+.hero h1{font-size:28px;margin:0;color:var(--blue-900)}
+.card{background:#fff;border:1px solid #eee;border-radius:12px;padding:16px;margin:12px 0}
+label{display:block;margin:8px 0 4px;font-weight:600}
+select,input{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px}
+button{padding:12px 16px;border:0;border-radius:10px;background:var(--blue-700);color:#fff;font-weight:700;cursor:pointer}
+.progress{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.step{padding:6px 10px;border-radius:999px;border:1px solid #ddd}
+.step.active{background:var(--blue-100);border-color:var(--blue-500);color:var(--blue-700)}
+.notice{background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:8px;margin:10px 0}
+.success{background:#ecfdf5;border:1px solid #a7f3d0;padding:10px;border-radius:8px;margin:10px 0}
+.price{font-size:26px;font-weight:800;color:var(--blue-900)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 220 60"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b2e5c"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs><rect width="220" height="60" rx="8" fill="url(#g)"/><g transform="translate(10,10)"><rect width="46" height="26" rx="4" fill="#e0f2fe" stroke="#0b2e5c"/><circle cx="12" cy="13" r="6" fill="#93c5fd"/><path d="M6,24 h34" stroke="#0b2e5c" stroke-width="2"/><text x="58" y="19" font-size="18" font-family="Arial" fill="#fff">Cool Quote</text></g></svg>
+    <strong>Cool Quote</strong>
+  </div>
+</header>
+
+<section class="hero container">
+  <h1>Get Your Instant Air Conditioning Quote</h1>
+  <p>At Cool Quote we work with local fitters to give you an instant price for your air conditioning supply and installation.</p>
+</section>
+
+<section class="container card">
+  <h2>Quote Wizard</h2>
+  <div class="progress" id="steps"></div>
+  <div id="stepContainer"></div>
+  <div style="margin-top:12px;display:flex;gap:8px;">
+    <button id="prevBtn" type="button">Back</button>
+    <button id="nextBtn" type="button">Next</button>
+  </div>
+</section>
+
+<section class="container card hidden" id="summary">
+  <h3>Your estimate</h3>
+  <div id="btuLine"></div>
+  <p class="price" id="totalPrice"></p>
+  <ul id="breakdown"></ul>
+  <div class="success">
+    <strong>Reference:</strong> <span id="refNo"></span><br>
+    We’ll be in touch shortly to book in a time to come and complete the job.<br>
+    <span id="validUntil"></span>
+  </div>
+</section>
+
+<script>
+const steps=[
+  {key:'houseType',label:'House type',opts:['Detached','Semi-detached','Terraced','Flat']},
+  {key:'room',label:'Room it’s going in',opts:['Bedroom','Living room','Home office','Other']},
+  {key:'floor',label:'Floor',opts:['Ground','First','Second or above']},
+  {key:'roomSize',label:'Room size',opts:['Small (0–150 sq ft)','Medium (151–300 sq ft)','Large (301–500 sq ft)','Extra Large (500+ sq ft)']},
+  {key:'sun',label:'Sunlight',opts:['Low','Medium','High']},
+  {key:'wallType',label:'Wall type',opts:['External','Internal (pipework needed)']},
+  {key:'height',label:'Install height',opts:['Floor','Mid wall','High wall']},
+  {key:'distance',label:'Distance between indoor and outdoor (m)',opts:['<3','3–7','>7']},
+  {key:'neighbour',label:'2.5m clearance to nearest neighbour?',opts:['Yes','No']},
+];
+let data={},current=0;
+const stepsEl=document.getElementById('steps'),stepContainer=document.getElementById('stepContainer'),prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn');
+
+function renderSteps(){stepsEl.innerHTML='';steps.forEach((s,i)=>{const el=document.createElement('div');el.className='step'+(i===current?' active':'');el.textContent=s.label;stepsEl.appendChild(el);});}
+function renderCurrent(){
+  const s=steps[current];
+  stepContainer.innerHTML=`<label for="${s.key}">${s.label}</label><select id="${s.key}">${s.opts.map(o=>`<option>${o}</option>`).join('')}</select>`;
+}
+function showSummary(){
+  document.querySelector('#summary').classList.remove('hidden');
+  let btu=6000; if(data.roomSize.startsWith('Medium')) btu+=3000; if(data.roomSize.startsWith('Large')) btu+=6000; if(data.roomSize.startsWith('Extra')) btu+=9000;
+  if(data.sun==='Medium') btu+=1000; if(data.sun==='High') btu+=2000;
+  document.getElementById('btuLine').textContent=`Estimated: ${btu} BTU`;
+  let product=900; if(btu>8000) product=1100; if(btu>12000) product=1400; if(btu>18000) product=1800;
+  let install=700; if(data.wallType.startsWith('Internal')) install+=150; if(data.height==='Mid wall') install+=75; if(data.height==='High wall') install+=150; if(data.distance==='3–7') install+=120; if(data.distance==='>7') install+=250; if(data.houseType==='Detached') install+=120; if(data.houseType==='Semi-detached') install+=60;
+  const cons=150,vat=(product+install)*0.2,total=product+install+cons+vat;
+  document.getElementById('totalPrice').textContent=`£${total.toFixed(2)}`;
+  document.getElementById('breakdown').innerHTML=`<li>Product: £${product}</li><li>Installation charges: £${install}</li><li>Consignment fee: £${cons} + VAT</li><li>VAT: £${vat.toFixed(2)}</li>`;
+  const ref=`CQ-${String(Math.floor(Math.random()*9999999)+1).padStart(7,'0')}`;
+  document.getElementById('refNo').textContent=ref;
+  const valid=new Date(Date.now()+30*24*60*60*1000);document.getElementById('validUntil').textContent=`Valid until: ${valid.toDateString()}`;
+}
+prevBtn.onclick=()=>{if(current>0){current--;renderSteps();renderCurrent();}};
+nextBtn.onclick=()=>{
+  const s=steps[current]; data[s.key]=document.getElementById(s.key).value;
+  if(s.key==='neighbour' && data.neighbour==='No'){alert('Must have 2.5m clearance.');return;}
+  if(current<steps.length-1){current++;renderSteps();renderCurrent();} else {showSummary();}
+};
+renderSteps();renderCurrent();
+</script>
+</body>
+</html>
